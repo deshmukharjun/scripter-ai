@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { Navbar } from '@/components/Navbar';
@@ -10,7 +10,7 @@ import { generateScripts, Script, ScriptResponse } from '@/lib/api';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
-export default function GeneratePage() {
+function GenerateContent() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -208,6 +208,21 @@ export default function GeneratePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function GeneratePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-blue-100/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader />
+        </div>
+      </div>
+    }>
+      <GenerateContent />
+    </Suspense>
   );
 }
 
