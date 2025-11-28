@@ -22,6 +22,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Default avatar and voice if not provided
+    // You can get these from the listAvatars and listVoices endpoints
+    const defaultAvatarId = '32dbf2775e394a51a96c75e5aadeeb86'; // Popular public avatar
+    const defaultVoiceId = 'bf6c84a338974305a21c51edcaa77ec0'; // Default English voice
+
     // Create video request - Using V2 API format
     // Documentation: https://docs.heygen.com/reference/create-avatar-video-v2
     const requestBody: any = {
@@ -29,12 +34,12 @@ export async function POST(request: NextRequest) {
         {
           character: {
             type: 'avatar',
-            ...(avatarId && { avatar_id: avatarId }),
+            avatar_id: avatarId || defaultAvatarId,
           },
           voice: {
             type: 'text',
             input_text: script,
-            ...(voiceId && { voice_id: voiceId }),
+            voice_id: voiceId || defaultVoiceId,
           },
         },
       ],

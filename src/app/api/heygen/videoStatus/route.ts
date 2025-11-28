@@ -22,7 +22,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const statusResponse = await fetch(`${HEYGEN_API_BASE}/video_status?video_id=${videoId}`, {
+    // Try the v2 video status endpoint
+    // Documentation suggests it might be /v2/video/status/{video_id}
+    const statusResponse = await fetch(`${HEYGEN_API_BASE}/video/status/${videoId}`, {
       method: 'GET',
       headers: {
         'X-Api-Key': process.env.HEYGEN_API_KEY,
