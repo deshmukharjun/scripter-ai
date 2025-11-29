@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cleanScriptForHeyGen } from '@/lib/scriptUtils';
 
 // HeyGen API Base URL - V2 API
 // Documentation: https://docs.heygen.com
@@ -27,6 +28,9 @@ export async function POST(request: NextRequest) {
     const defaultAvatarId = '32dbf2775e394a51a96c75e5aadeeb86'; // Popular public avatar
     const defaultVoiceId = 'bf6c84a338974305a21c51edcaa77ec0'; // Default English voice
 
+    // Clean the script to remove brackets and special markers for HeyGen
+    const cleanedScript = cleanScriptForHeyGen(script);
+
     // Create video request - Using V2 API format
     // Documentation: https://docs.heygen.com/reference/create-avatar-video-v2
     const requestBody: any = {
@@ -38,7 +42,7 @@ export async function POST(request: NextRequest) {
           },
           voice: {
             type: 'text',
-            input_text: script,
+            input_text: cleanedScript,
             voice_id: voiceId || defaultVoiceId,
           },
         },
@@ -79,7 +83,7 @@ export async function POST(request: NextRequest) {
         url: `${HEYGEN_API_BASE}/video/generate`,
         error: errorData,
         requestBody: {
-          video_inputs: [{ character: { type: 'avatar' }, voice: { type: 'text', input_text: script.substring(0, 50) + '...' } }]
+          video_inputs: [{ character: { type: 'avatar' }, voice: { type: 'text', input_text: cleanedScript.substring(0, 50) + '...' } }]
         }
       });
       
@@ -95,7 +99,12 @@ export async function POST(request: NextRequest) {
     }
 
     const videoData = await createVideoResponse.json();
-    return NextResponse.json(videoData);
+    
+    // Return video data along with cleaned script for storage
+    return NextResponse.json({
+      ...videoData,
+      cleanedScript, // Include cleaned script in response
+    });
   } catch (error: any) {
     console.error('Error creating HeyGen video:', error);
     return NextResponse.json(

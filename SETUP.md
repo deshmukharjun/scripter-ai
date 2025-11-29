@@ -37,9 +37,20 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
       allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
     }
+    match /videos/{videoId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    }
   }
 }
 ```
+
+**To update your Firestore rules:**
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Select your project
+3. Navigate to **Firestore Database** > **Rules** tab
+4. Paste the rules above
+5. Click **Publish** to save the changes
 
 ## Step 3: Environment Variables
 
@@ -151,8 +162,9 @@ src/
 
 ### Firestore Errors
 - Ensure Firestore is enabled in Firebase Console
-- Check security rules allow authenticated users
-- Verify collection name is `scripts`
+- Check security rules allow authenticated users for both `scripts` and `videos` collections
+- Verify collection names are `scripts` and `videos`
+- If you get "Missing or insufficient permissions" error, update your Firestore security rules to include the `videos` collection (see rules above)
 
 ## Next Steps
 

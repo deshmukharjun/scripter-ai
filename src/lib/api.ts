@@ -66,6 +66,20 @@ export interface HeyGenVideoStatus {
   };
 }
 
+export interface GeneratedVideo {
+  id?: string;
+  userId: string;
+  videoId: string;
+  videoUrl: string;
+  thumbnailUrl?: string;
+  originalScript: string;
+  cleanedScript: string;
+  title?: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  createdAt: Date;
+  completedAt?: Date;
+}
+
 // HeyGen API functions
 export const createHeyGenVideo = async (
   script: string,

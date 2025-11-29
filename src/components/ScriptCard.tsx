@@ -2,6 +2,10 @@
 
 import { useState } from 'react';
 import { Script, createHeyGenVideo, checkHeyGenVideoStatus } from '@/lib/api';
+import { useAuth } from './AuthProvider';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { cleanScriptForHeyGen } from '@/lib/scriptUtils';
 
 interface ScriptCardProps {
   script: Script;
@@ -9,6 +13,7 @@ interface ScriptCardProps {
 }
 
 export function ScriptCard({ script, onCopy }: ScriptCardProps) {
+  const { user } = useAuth();
   const [copied, setCopied] = useState(false);
   const [creatingVideo, setCreatingVideo] = useState(false);
   const [videoStatus, setVideoStatus] = useState<'idle' | 'creating' | 'processing' | 'completed' | 'error'>('idle');
@@ -34,6 +39,9 @@ export function ScriptCard({ script, onCopy }: ScriptCardProps) {
     setVideoUrl(null);
 
     try {
+      // Clean the script for HeyGen
+      const cleanedScript = cleanScriptForHeyGen(script.content);
+
       // Create video
       const createResponse = await createHeyGenVideo(
         script.content,
@@ -61,9 +69,31 @@ export function ScriptCard({ script, onCopy }: ScriptCardProps) {
             const status = statusResponse.data?.status;
 
             if (status === 'completed') {
+              const finalVideoUrl = statusResponse.data?.video_url || null;
               setVideoStatus('completed');
-              setVideoUrl(statusResponse.data?.video_url || null);
+              setVideoUrl(finalVideoUrl);
               setCreatingVideo(false);
+
+              // Save video to Firebase
+              if (user && db && finalVideoUrl) {
+                try {
+                  await addDoc(collection(db, 'videos'), {
+                    userId: user.uid,
+                    videoId: newVideoId,
+                    videoUrl: finalVideoUrl,
+                    thumbnailUrl: statusResponse.data?.thumbnail_url || null,
+                    originalScript: script.content,
+                    cleanedScript: cleanedScript,
+                    title: `Script ${script.id} - Video`,
+                    status: 'completed',
+                    createdAt: Timestamp.now(),
+                    completedAt: Timestamp.now(),
+                  });
+                } catch (saveError) {
+                  console.error('Failed to save video to Firebase:', saveError);
+                  // Don't throw - video was created successfully, just saving failed
+                }
+              }
               return;
             } else if (status === 'failed') {
               setVideoStatus('error');

@@ -58,6 +58,7 @@ export function Navbar() {
             <div className="hidden md:ml-10 md:flex items-baseline space-x-2">
               <NavLink href="/generate">Generate</NavLink>
               <NavLink href="/dashboard">Dashboard</NavLink>
+              <NavLink href="/videos">Videos</NavLink>
             </div>
           </div>
           <div className="flex items-center space-x-3">
@@ -124,6 +125,17 @@ export function Navbar() {
               }`}
             >
               Dashboard
+            </Link>
+            <Link
+              href="/videos"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`block px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                isActive('/videos')
+                  ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+              }`}
+            >
+              Videos
             </Link>
             <div className="pt-2 border-t border-gray-200 dark:border-gray-800">
               <p className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 truncate">
